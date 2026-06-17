@@ -17,19 +17,16 @@ jobs:
           docker stop juice-shop-instance || true
           docker rm juice-shop-instance || true
 
-      - name: Install dependencies
-        run: npm install
-
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          clean: true
+        uses: actions/checkout@v4  # To jest kluczowe: pobiera kod z GitHuba do runnera
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Run Dependency Scan (SCA)
         run: |
