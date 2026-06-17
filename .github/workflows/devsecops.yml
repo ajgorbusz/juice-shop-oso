@@ -23,6 +23,11 @@ jobs:
           fetch-depth: 0
           clean: true
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
       - name: Run Dependency Scan (SCA)
         run: |
           npm install --package-lock-only
