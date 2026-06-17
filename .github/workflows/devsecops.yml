@@ -66,15 +66,14 @@ jobs:
 
       - name: Run OWASP ZAP (DAST)
         run: |
-          docker run --rm --network="host" -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:3000 -r zap-report.html -I
-      - name: Login to Docker Hub
+          docker run --rm -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://host.docker.internal:3000 -r zap-report.html -I      - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Push Verified Image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:${{ github.sha }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest
-        - name: Upload DevSecOps Reports
+      - name: Upload DevSecOps Reports
         uses: actions/upload-artifact@v4
         with:
           name: devsecops-security-reports
