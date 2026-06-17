@@ -29,11 +29,19 @@ export function login () {
       })
   }
 
-  return (req: Request, res: Response, next: NextFunction) => {
-    verifyPreLoginChallenges(req) // vuln-code-snippet hide-line
-    models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: UserModel, plain: true }) // vuln-code-snippet vuln-line loginAdminChallenge loginBenderChallenge loginJimChallenge
-      .then((authenticatedUser) => { // vuln-code-snippet neutral-line loginAdminChallenge loginBenderChallenge loginJimChallenge
+	return (req: Request, res: Response, next: NextFunction) => {
+    verifyPreLoginChallenges(req)
+      .then(() => {
+        // Prawidłowe wywołanie query z zachowaniem Promise
+        return models.sequelize.query('SELECT * FROM Users WHERE email = :email AND password = :password', {
+          replacements: { email: req.body.email, password: req.body.password },
+          type: models.sequelize.QueryTypes.SELECT
+        });
+      })
+      .then((authenticatedUser) => { 
+        // Tutaj 'authenticatedUser' to wynik Twojego query
         const user = utils.queryResultToJson(authenticatedUser)
+        // ... reszta Twojego kodu bez zmian 
         if (user.data?.id && user.data.totpSecret !== '') {
           res.status(401).json({
             status: 'totp_token_required',
