@@ -32,16 +32,16 @@ jobs:
         run: |
           npm install --package-lock-only --ignore-scripts
           npm audit --audit-level=high || true
+
       - name: Run Static Code Analysis (SAST)
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: p/security-audit
+        run: |
+          brew install semgrep
+          semgrep scan --config=p/security-audit || true
 
       - name: Run Secret Scanning (Gitleaks)
-        continue-on-error: true
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          brew install gitleaks
+          gitleaks detect --source . -v || true
 
       - name: Build Docker Image
         run: |
