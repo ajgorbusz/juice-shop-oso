@@ -31,17 +31,17 @@ export function login () {
 
   return (req: Request, res: Response, next: NextFunction) => {
     verifyPreLoginChallenges(req)
-      .then(() => {
-        // Prawidłowe wywołanie query z zachowaniem Promise
-        return models.sequelize.query('SELECT * FROM Users WHERE email = :email AND password = :password', {
-          replacements: { email: req.body.email, password: req.body.password },
-          type: models.sequelize.QueryTypes.SELECT
-        })
-      })
-      .then((authenticatedUser) => {
-        // Tutaj 'authenticatedUser' to wynik Twojego query
-        const user = utils.queryResultToJson(authenticatedUser)
-        // ... reszta Twojego kodu bez zmian
+
+    models.sequelize.query('SELECT * FROM Users WHERE email = :email AND password = :password AND deletedAt IS NULL', {
+      replacements: { 
+        email: req.body.email || '', 
+        password: security.hmacMskd(req.body.password || '') 
+      },
+      model: models.User,
+      plain: true
+    })
+      .then((authenticatedUser: any) => { 
+        const user = utils.queryResultToJson(authenticatedUser)       
         if (user.data?.id && user.data.totpSecret !== '') {
           res.status(401).json({
             status: 'totp_token_required',
