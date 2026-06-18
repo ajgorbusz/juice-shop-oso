@@ -33,15 +33,15 @@ export function login () {
     verifyPreLoginChallenges(req)
 
     models.sequelize.query('SELECT * FROM Users WHERE email = :email AND password = :password AND deletedAt IS NULL', {
-      replacements: { 
-        email: req.body.email || '', 
-        password: security.hmacMskd(req.body.password || '') 
+      replacements: {
+        email: req.body.email || '',
+        password: security.hmacMskd(req.body.password || '')
       },
       model: models.User,
       plain: true
     })
-      .then((authenticatedUser: any) => { 
-        const user = utils.queryResultToJson(authenticatedUser)       
+      .then((authenticatedUser: any) => {
+        const user = utils.queryResultToJson(authenticatedUser)
         if (user.data?.id && user.data.totpSecret !== '') {
           res.status(401).json({
             status: 'totp_token_required',
